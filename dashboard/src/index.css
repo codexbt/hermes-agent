@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --neon-blue: #00f0ff;
+  --neon-purple: #a855f7;
+  --neon-green: #22c55e;
+  --neon-pink: #f472b6;
+  --bg-dark: #0a0a0f;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0a0a0f;
+  color: white;
+}
+
+/* Futuristic UI */
+.holo-panel {
+  background: rgba(10, 10, 15, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.neon-text {
+  text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+}
+
+.agent-card {
+  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.agent-card:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+}
+
+/* 3D Canvas container */
+#three-canvas {
+  background: radial-gradient(circle at 50% 30%, #1a1a2e 0%, #0a0a0f 70%);
+}
+
+/* Glowing log lines */
+.log-line {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #00f0ff;
+  text-shadow: 0 0 8px #00f0ff;
+}
+
+/* Status indicators */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  box-shadow: 0 0 12px currentColor;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

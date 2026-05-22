@@ -1,0 +1,72 @@
+# HermesClaw / Kairos-Hermes Swarm
+# Multi-provider LLM support (Ollama local + remote via API keys)
+#
+# Use:  python main.py llm     → interactive selector with auto model fetch on key entry
+#       python main.py llm --list
+#
+# The new 'llm' section takes precedence. Old 'ollama' section kept for backward compat.
+
+llm:
+  provider: "ollama"                 # ollama | openai | groq | xai | deepseek | together | fireworks
+  default_model: "qwen2.5-coder:7b"
+  # api_key: "sk-..."              # optional (prefer env vars). Only saved if you explicitly choose in `llm` command
+  # base_url: "https://..."        # override for custom endpoints
+
+# Legacy Ollama block (still read if no 'llm' section)
+ollama:
+  base_url: "http://localhost:11434"
+  default_model: "qwen2.5-coder:7b"
+  embedding_model: "nomic-embed-text"
+  timeout: 300
+  temperature: 0.6
+  max_tokens: 8192
+
+memory:
+  sqlite_path: "hermes/memory.db"
+  chroma_path: "hermes/chroma_db"
+  collection_name: "hermes_knowledge"
+  max_context_tokens: 12000
+
+kairos:
+  enabled: true
+  scan_interval_minutes: 15
+  max_proactive_fixes: 3
+  require_user_approval: true
+  scan_paths: [".", "core", "hermes", "agents"]
+
+swarm:
+  max_concurrent_agents: 4
+  default_timeout_per_task: 600
+
+safety:
+  require_approval_for:
+    - "file_delete"
+    - "git_push"
+    - "git_reset_hard"
+    - "bash_high_risk"
+  auto_approve_safe: true
+  approval_timeout_seconds: 300
+
+logging:
+  level: "INFO"
+  file: "hermes/hermes.log"
+  console: true
+
+skills:
+  auto_generate: true
+  min_success_threshold: 0.8
+
+soul:
+  file: "hermes/soul.md"
+  auto_update: true
+
+# Multi-platform bot configuration (Telegram + Discord + WhatsApp)
+# Use `python main.py llm` style or edit here. Recommended: put real tokens in .env instead of this file.
+messaging:
+  telegram_token: ""          # Get from @BotFather on Telegram
+  discord_token: ""           # From Discord Developer Portal → Bot
+  whatsapp_api_key: ""        # Optional. For production use WhatsApp Business API (pywhatkit is unofficial)
+  allowed_users: []           # IMPORTANT: list of user IDs (strings). Bot ignores everyone else.
+                              # Telegram: use /getid bot or user.id from update
+                              # Discord: right-click user → Copy ID (enable dev mode)
+                              # Example: allowed_users: ["123456789", "987654321"]

@@ -1,0 +1,27 @@
+ollama>=0.3.0
+openai>=1.30.0
+chromadb>=0.5.0
+gitpython>=3.1.0
+pyyaml>=6.0
+pydantic>=2.0
+duckduckgo-search>=6.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+rich>=13.0
+pytest>=8.0
+sentence-transformers>=3.0
+tenacity>=8.0
+python-dotenv>=1.0
+# Optional advanced: langgraph>=0.2.0 langchain-core>=0.3.0 langchain-ollama>=0.2.0
+
+# Multi-platform bot support (Telegram + Discord + WhatsApp)
+python-telegram-bot>=21.0
+discord.py>=2.3.0
+pywhatkit>=5.4.0          # WhatsApp unofficial (use at own risk)
+python-dotenv>=1.0        # already present, for .env tokens
+
+# 3D Futuristic Dashboard (FastAPI + WebSocket + React)
+fastapi[standard]>=0.115.0   # already present, includes uvicorn + websockets
+python-multipart>=0.0.9
+websockets>=12.0             # explicit for real-time agent status
+# Note: React frontend (dashboard/) uses its own package.json (Node deps)
