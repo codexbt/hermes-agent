@@ -114,9 +114,13 @@ Rules:
         system = self.DEFAULT_SYSTEM.format(tools=self._format_tools())
         memory_context = self.memory.get_relevant_context(goal, max_items=4)
 
+        # Claw Code style: auto-inject @path file context
+        file_context = self.tools.extract_file_context(goal) if hasattr(self.tools, 'extract_file_context') else ""
+        combined_context = (extra_context + "\n" + file_context).strip()
+
         messages = [
             {"role": "system", "content": system},
-            {"role": "user", "content": f"GOAL: {goal}\n\nRELEVANT MEMORY:\n{memory_context}\n\nEXTRA CONTEXT:\n{extra_context}\n\nBegin."},
+            {"role": "user", "content": f"GOAL: {goal}\n\nRELEVANT MEMORY:\n{memory_context}\n\nEXTRA CONTEXT:\n{combined_context}\n\nBegin."},
         ]
 
         final_answer = "Task did not complete within iteration limit."

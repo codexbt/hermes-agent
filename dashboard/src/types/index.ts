@@ -15,4 +15,14 @@ export interface DashboardState {
   kairos_heartbeat: string;
   token_usage: number;
   logs: string[];
+  preview_text?: string;
+  // Real task + reverse timer
+  current_goal?: string;
+  started_at?: string;
+  estimated_duration_seconds?: number;
+  time_remaining_seconds?: number;
+  real_artifacts?: string[];
+  real_result?: string;
+  task_running?: boolean;
+  task_completed?: boolean;
 }

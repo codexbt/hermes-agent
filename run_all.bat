@@ -35,7 +35,7 @@ set /p choice="Enter your choice (1-3): "
 
 if "%choice%"=="1" (
     echo 🎨 Launching Dashboard...
-    start cmd /k "python -m uvicorn backend.dashboard_api:app --reload --port 8001"
+    start cmd /k "python -m uvicorn backend.dashboard_api:app --reload --reload-dir backend --reload-dir core --reload-dir hermes --port 8001"
     timeout /t 2
     cd dashboard
     if not exist "node_modules" npm install > nul 2>&1
@@ -45,7 +45,7 @@ if "%choice%"=="1" (
     python -m core.kairos_daemon
 ) else if "%choice%"=="3" (
     echo 🎨 Launching Dashboard...
-    start cmd /k "python -m uvicorn backend.dashboard_api:app --reload --port 8001"
+    start cmd /k "python -m uvicorn backend.dashboard_api:app --reload --reload-dir backend --reload-dir core --reload-dir hermes --port 8001"
     echo 🤖 Launching Kairos Daemon...
     start cmd /k "python -m core.kairos_daemon"
     timeout /t 2

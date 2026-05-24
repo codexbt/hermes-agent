@@ -11,7 +11,7 @@ REM 1. Sets up Python virtual environment
 REM 2. Installs Python dependencies
 REM 3. Sets up Node.js dependencies for dashboard
 REM 4. Starts FastAPI backend on port 8001 (new window)
-REM 5. Starts React dashboard dev server on port 3000 (new window)
+REM 5. Starts KAIROS Dashboard (React) on port 3000 (new window) from the "dashboard" folder
 REM 6. Starts bot/swarm orchestrator (new window)
 REM ============================================================
 
@@ -68,24 +68,22 @@ echo Starting Services...
 echo ============================================================
 echo.
 echo ^[1/3^] Starting FastAPI Backend (http://localhost:8001)...
-start "HermesClaw Backend" cmd /k "python -m uvicorn backend.dashboard_api:app --host 0.0.0.0 --port 8001 --reload"
+start "HermesClaw Backend" cmd /k "python -m uvicorn backend.dashboard_api:app --host 0.0.0.0 --port 8001 --reload --reload-dir backend --reload-dir core --reload-dir hermes"
 
-echo ^[2/3^] Starting React Dashboard (http://localhost:3000)...
-timeout /t 2 /nobreak
+echo ^[2/3^] Starting KAIROS Dashboard (http://localhost:3000)...
 
-REM Check if node_modules exists, if not install
-if not exist "dashboard\node_modules" (
-    echo Installing Node dependencies (first time only)...
-    cd dashboard
-    call npm install
-    cd ..
-)
+set DASHBOARD_DIR=dashboard
 
-start "HermesClaw Dashboard" cmd /k "cd dashboard && npm run dev"
+REM Important: Make sure you have run "cd dashboard && npm install --legacy-peer-deps" at least once
 
-echo ^[3/3^] Starting Bot/Swarm Orchestrator...
-timeout /t 3 /nobreak
-start "HermesClaw Bot" cmd /k "python bot_orchestrator.py"
+start "HermesClaw Dashboard" cmd /k "cd /d %~dp0\%DASHBOARD_DIR% && npm run dev"
+
+REM [3/3] Bot is disabled for now (fake tokens causing errors).
+REM To enable later, put real tokens in config.yaml or .env and uncomment the lines below.
+
+REM echo ^[3/3^] Starting Bot/Swarm Orchestrator...
+REM timeout /t 3 /nobreak
+REM start "HermesClaw Bot" cmd /k "python bot_orchestrator.py"
 
 echo.
 echo ============================================================
@@ -95,12 +93,22 @@ echo.
 echo Open your browser: http://localhost:3000
 echo.
 echo Services:
-echo   - 3D Dashboard:  http://localhost:3000
+echo   - KAIROS Dashboard:  http://localhost:3000
 echo   - FastAPI Docs: http://localhost:8001/docs
-echo   - Bot Console:   Active in separate window
 echo.
-echo To stop services: Close each window or press Ctrl+C
+echo To stop services: Close this window (or press any key).
+echo All other windows will be closed automatically.
 echo.
 echo ============================================================
 echo.
-pause
+
+pause >nul
+
+echo Stopping all services...
+
+taskkill /FI "WINDOWTITLE eq HermesClaw Backend*" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq HermesClaw Dashboard*" /F >nul 2>&1
+REM taskkill /FI "WINDOWTITLE eq HermesClaw Bot*" /F >nul 2>&1
+
+echo All services stopped.
+timeout /t 2 >nul

@@ -27,22 +27,25 @@ pip install -q -r requirements.txt
 
 REM Start the dashboard backend
 echo 🚀 Starting FastAPI Dashboard Backend (port 8001)...
-start cmd /k "python -m uvicorn backend.dashboard_api:app --reload --port 8001"
+start cmd /k "python -m uvicorn backend.dashboard_api:app --reload --reload-dir backend --reload-dir core --reload-dir hermes --port 8001"
 
 REM Wait a second for backend to start
 timeout /t 2 /nobreak
 
+set DASHBOARD_DIR=kairos
+if not exist "%DASHBOARD_DIR%" set DASHBOARD_DIR=dashboard
+
 REM Check if Node modules exist
-if not exist "dashboard\node_modules" (
+if not exist "%DASHBOARD_DIR%\node_modules" (
     echo 📦 Installing Frontend dependencies...
-    cd dashboard
-    call npm install
+    cd %DASHBOARD_DIR%
+    call npm install --legacy-peer-deps
     cd ..
 )
 
 REM Start the React frontend dev server
-echo 🎨 Starting React 3D Dashboard Frontend (port 3000)...
-cd dashboard
+echo 🎨 Starting Dashboard Frontend (port 3000)...
+cd %DASHBOARD_DIR%
 call npm run dev
 
 echo.

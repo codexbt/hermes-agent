@@ -21,10 +21,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
+import re
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+
+class GoalRequest(BaseModel):
+    goal: str
+    mode: str = 'task'
+
 import uvicorn
 
 # Add parent to path for imports
@@ -51,7 +57,17 @@ class DashboardState(BaseModel):
     skills_created: int
     kairos_heartbeat: str
     token_usage: int
-    logs: List[str]  # recent log lines
+    logs: List[str]
+    preview_text: str = "No preview available yet."
+    # Real task tracking + timer
+    current_goal: str = ""
+    started_at: str = ""
+    estimated_duration_seconds: int = 0
+    time_remaining_seconds: int = 0
+    real_artifacts: List[str] = []
+    real_result: str = ""
+    task_running: bool = False
+    task_completed: bool = False
 
 # --- In-memory state (in production use Redis or proper pubsub) ---
 connected_clients: Set[WebSocket] = set()
@@ -68,10 +84,22 @@ current_state: DashboardState = DashboardState(
     skills_created=17,
     kairos_heartbeat=datetime.now().isoformat(),
     token_usage=128450,
-    logs=["[SYSTEM] Dashboard backend online", "[KAIROS] Heartbeat OK"]
+    logs=["[SYSTEM] Dashboard backend online", "[KAIROS] Heartbeat OK"],
+    current_goal="",
+    started_at="",
+    estimated_duration_seconds=45,
+    time_remaining_seconds=0,
+    real_artifacts=[],
+    real_result="",
+    task_running=False,
+    task_completed=False,
 )
 
-app = FastAPI(title="HermesClaw 3D Command Center", version="1.0")
+app = FastAPI(title="KAIROS - AI Operating System", version="1.0")
+
+@app.get("/")
+async def root():
+    return {"message": "KAIROS Backend is running. Visit /docs for API documentation."}
 
 # CORS for React dev server (localhost:3000) and production
 app.add_middleware(
@@ -149,27 +177,102 @@ async def update_agent(agent_update: AgentStatus):
     return {"success": True}
 
 @app.post("/api/trigger_goal")
-async def trigger_goal(goal: str):
-    """Trigger a new swarm goal from dashboard (integrates with core)"""
+async def trigger_goal(request: GoalRequest):
+    """Trigger a NEW REAL swarm goal from dashboard. Runs actual orchestrator + shows live timer + real results."""
+    goal = request.goal.strip()
+    mode = request.mode or 'task'
     global current_state
-    current_state.active_task = goal
-    current_state.logs.append(f"[{datetime.now().strftime('%H:%M:%S')}] DASHBOARD: New goal received → {goal[:60]}...")
 
-    # Simulate starting the swarm (in real impl: call from bot_orchestrator or main)
-    # For now broadcast that orchestrator is working
+    if mode == 'chat':
+        current_state.logs.append(f"[{datetime.now().strftime('%H:%M:%S')}] DASHBOARD CHAT: {goal[:80]}")
+        await manager.broadcast({"type": "new_goal", "goal": goal, "mode": mode, "full_state": current_state.model_dump()})
+        return {"message": "Chat received", "goal": goal}
+
+    # === REAL TASK START ===
+    current_state.current_goal = goal
+    current_state.active_task = goal
+    current_state.started_at = datetime.now().isoformat()
+    current_state.task_running = True
+    current_state.task_completed = False
+    current_state.real_artifacts = []
+    current_state.real_result = "Running real swarm..."
+    current_state.logs = current_state.logs[-8:] + [f"[{datetime.now().strftime('%H:%M:%S')}] REAL GOAL STARTED: {goal[:70]}"]
+
+    # Smart ETA (30s for simple, up to 3min for complex)
+    est = 45
+    if len(goal) > 80: est = 90
+    if any(k in goal.lower() for k in ["full", "app", "website", "system", "complete"]): est = 120
+    if any(k in goal.lower() for k in ["html", "page", "function", "script"]): est = 35
+    current_state.estimated_duration_seconds = est
+    current_state.time_remaining_seconds = est
+
+    # Reset agents to working state for this real task
     for agent in current_state.agents:
-        if agent.name == "Orchestrator":
-            agent.status = "working"
-            agent.current_task = f"Coordinating: {goal[:40]}"
-            agent.progress = 10
-            agent.last_update = datetime.now().isoformat()
+        agent.status = "thinking" if agent.name != "Orchestrator" else "working"
+        agent.current_task = f"Starting: {goal[:35]}"
+        agent.progress = 5
+        agent.last_update = datetime.now().isoformat()
 
     await manager.broadcast({
         "type": "new_goal",
         "goal": goal,
         "full_state": current_state.model_dump()
     })
-    return {"message": "Goal queued for swarm", "goal": goal}
+
+    # Run the REAL swarm in background thread (non-blocking)
+    async def _run_real_swarm():
+        from agents.orchestrator import run_swarm
+        from core.dashboard_events import emit_agent_update, emit_log, emit_metrics
+        import asyncio
+
+        start_time = time.time()
+
+        def progress_tick():
+            remaining = max(0, int(est - (time.time() - start_time)))
+            current_state.time_remaining_seconds = remaining
+            # Live broadcast timer every second (handled by ticker below)
+
+        try:
+            emit_log(f"🚀 Starting real swarm for: {goal[:60]}...", "info", "Orchestrator")
+            emit_agent_update("Orchestrator", "working", f"Coordinating: {goal[:45]}", 15)
+
+            # This is the actual call that does real work (now properly fixed Coder etc.)
+            result = await asyncio.to_thread(run_swarm, goal, project_root=str(Path(__file__).parent.parent))
+
+            duration = time.time() - start_time
+            current_state.time_remaining_seconds = 0
+            current_state.task_running = False
+            current_state.task_completed = True
+            current_state.real_result = result.output
+            current_state.real_artifacts = result.artifacts or []
+            current_state.tasks_completed += 1 if result.success else 0
+
+            # Final real updates
+            emit_log(f"✅ REAL TASK COMPLETE in {duration:.1f}s", "success", "Orchestrator")
+            emit_metrics(tasks_completed=current_state.tasks_completed)
+            for a in current_state.agents:
+                a.status = "completed"
+                a.progress = 100
+                a.current_task = "Task finished - see real output"
+
+            await manager.broadcast({
+                "type": "task_complete",
+                "full_state": current_state.model_dump(),
+                "result": result.output,
+                "artifacts": current_state.real_artifacts,
+            })
+
+        except Exception as e:
+            current_state.task_running = False
+            current_state.real_result = f"ERROR: {str(e)}"
+            emit_log(f"❌ Swarm failed: {e}", "error", "Orchestrator")
+            await manager.broadcast({"type": "task_error", "error": str(e), "full_state": current_state.model_dump()})
+
+    asyncio.create_task(_run_real_swarm())
+    # Start live countdown ticker for this task
+    asyncio.create_task(_countdown_timer(est))
+
+    return {"message": "REAL swarm started", "goal": goal, "estimated_seconds": est}
 
 @app.get("/api/agents")
 async def get_agents():
@@ -189,15 +292,30 @@ async def websocket_dashboard(websocket: WebSocket):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
-# --- Background simulation for demo (remove in production when real events come) ---
+# --- Real countdown timer (only active during real tasks) ---
+async def _countdown_timer(estimated: int):
+    """Live reverse timer broadcast every second while task is running."""
+    global current_state
+    for _ in range(estimated + 5):
+        if not current_state.task_running:
+            break
+        await asyncio.sleep(1)
+        current_state.time_remaining_seconds = max(0, current_state.time_remaining_seconds - 1)
+        await manager.broadcast({
+            "type": "timer_tick",
+            "time_remaining": current_state.time_remaining_seconds,
+            "full_state": current_state.model_dump()
+        })
+
+# --- Background simulation (only runs when NO real task is active) ---
 async def simulate_agent_activity():
-    """Demo: randomly update agents so the 3D scene looks alive even without real swarm"""
+    """Only for visual flair when idle. Real tasks disable this."""
     agent_names = ["Architect", "Coder", "Tester", "Scribe"]
     statuses = ["thinking", "working", "completed"]
     while True:
-        await asyncio.sleep(4)
-        if not connected_clients:
-            continue  # no one watching
+        await asyncio.sleep(5)
+        if not connected_clients or current_state.task_running:
+            continue  # real task is running → don't fake anything
 
         import random
         agent_name = random.choice(agent_names)
@@ -244,4 +362,14 @@ async def startup_event():
 
 # For direct run: python -m backend.dashboard_api
 if __name__ == "__main__":
-    uvicorn.run("backend.dashboard_api:app", host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run(
+        "backend.dashboard_api:app",
+        host="0.0.0.0",
+        port=8001,
+        reload=True,
+        reload_dirs=[
+            str(Path(__file__).parent),
+            str(Path(__file__).parent.parent / "core"),
+            str(Path(__file__).parent.parent / "hermes"),
+        ],
+    )

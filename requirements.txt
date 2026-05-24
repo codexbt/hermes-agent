@@ -17,7 +17,7 @@ python-dotenv>=1.0
 # Multi-platform bot support (Telegram + Discord + WhatsApp)
 python-telegram-bot>=21.0
 discord.py>=2.3.0
-pywhatkit>=5.4.0          # WhatsApp unofficial (use at own risk)
+# pywhatkit>=5.4.0          # WhatsApp unofficial (use at own risk) - commented to avoid pyautogui/pyscreeze conflicts; use WhatsApp Business API instead
 python-dotenv>=1.0        # already present, for .env tokens
 
 # 3D Futuristic Dashboard (FastAPI + WebSocket + React)

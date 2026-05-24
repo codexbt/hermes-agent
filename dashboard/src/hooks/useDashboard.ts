@@ -52,13 +52,19 @@ export const useDashboard = () => {
               if (data.type === 'agent_update' && data.full_state) {
                 return data.full_state;
               }
+              if (data.type === 'log_update' && data.data) {
+                return { ...prev, logs: data.data };
+              }
               if (data.type === 'agent_update' && data.data) {
                 const updatedAgents = prev.agents.map((a) =>
                   a.name === data.data.name ? data.data : a
                 );
                 return { ...prev, agents: updatedAgents };
               }
-              return prev;
+                if ((data.type === 'new_goal' || data.type === 'metrics_update' || data.type === 'timer_tick' || data.type === 'task_complete' || data.type === 'task_error') && data.full_state) {
+                  return data.full_state;
+                }
+                return prev;
             });
           } catch (err) {
             console.error('Failed to parse WebSocket message:', err);
@@ -92,12 +98,12 @@ export const useDashboard = () => {
     };
   }, []);
 
-  const triggerGoal = useCallback(async (goal: string) => {
+  const triggerGoal = useCallback(async (goal: string, mode: 'task' | 'chat' = 'task') => {
     try {
       const response = await fetch(`${API_URL}/api/trigger_goal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goal }),
+        body: JSON.stringify({ goal, mode }),
       });
       const result = await response.json();
       console.log('Goal triggered:', result);

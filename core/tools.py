@@ -390,6 +390,30 @@ class ClawTools:
             },
         )
 
+    # ---------------- CLAW-CODE STYLE FILE CONTEXT ----------------
+    def extract_file_context(self, text: str, max_files: int = 8, max_chars_per_file: int = 4000) -> str:
+        """Extract @path references from text and return their contents (Claw Code style)."""
+        import re
+        paths = re.findall(r'@([^\s\'"`]+)', text)
+        if not paths:
+            return ""
+
+        context_parts = []
+        seen = set()
+        for raw_path in paths[:max_files]:
+            try:
+                p = self._safe_path(raw_path)
+                if p in seen or not p.exists() or not p.is_file():
+                    continue
+                seen.add(p)
+                content = p.read_text(encoding="utf-8", errors="replace")
+                if len(content) > max_chars_per_file:
+                    content = content[:max_chars_per_file] + "\n... [truncated]"
+                context_parts.append(f"=== FILE: {raw_path} ===\n{content}\n")
+            except Exception:
+                pass
+        return "\n".join(context_parts)
+
 
 # Convenience factory used by other modules
 def get_tools(

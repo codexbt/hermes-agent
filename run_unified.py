@@ -73,7 +73,7 @@ def main():
     
     # Start FastAPI backend
     print("[1/3] Starting FastAPI Backend (http://localhost:8001)...")
-    backend_cmd = "python -m uvicorn backend.dashboard_api:app --host 0.0.0.0 --port 8001 --reload"
+    backend_cmd = "python -m uvicorn backend.dashboard_api:app --host 0.0.0.0 --port 8001 --reload --reload-dir backend --reload-dir core --reload-dir hermes"
     if platform.system() == "Windows":
         subprocess.Popen(f'start "HermesClaw Backend" cmd /k {backend_cmd}', shell=True)
     else:
@@ -81,18 +81,18 @@ def main():
     
     time.sleep(2)
     
-    # Install dashboard dependencies if needed
-    dashboard_dir = Path("dashboard")
+    # Determine dashboard folder
+    dashboard_dir = Path("kairos") if Path("kairos").exists() else Path("dashboard")
     if not (dashboard_dir / "node_modules").exists():
         print("\n[2/3] Installing Node dependencies (first time only)...")
         os.chdir(dashboard_dir)
-        run_command("npm install")
+        run_command("npm install --legacy-peer-deps")
         os.chdir(script_dir)
     else:
-        print("\n[2/3] Starting React Dashboard (http://localhost:3000)...")
+        print(f"\n[2/3] Starting dashboard ({dashboard_dir} on http://localhost:3000)...")
     
-    # Start React dashboard
-    dashboard_cmd = "cd dashboard && npm run dev"
+    # Start dashboard
+    dashboard_cmd = f"cd {dashboard_dir} && npm run dev"
     if platform.system() == "Windows":
         subprocess.Popen(f'start "HermesClaw Dashboard" cmd /k {dashboard_cmd}', shell=True)
     else:

@@ -31,6 +31,7 @@ from core.kairos_daemon import KairosDaemon
 from core.react_loop import ReactLoop, get_react_loop, make_llm_call
 from core.tools import get_tools
 from hermes.memory import get_memory
+from core.llm import get_llm_manager
 
 console = Console()
 
@@ -214,6 +215,56 @@ def cmd_bot(_args):
         console.print("[red]Bot crashed. See logs/bot.log[/red]")
 
 
+def cmd_doctor(_args):
+    """Claw Code style system health check."""
+    banner()
+    console.print("[bold cyan]Running Kairos Doctor...[/bold cyan]\n")
+
+    checks = []
+
+    # 1. Tools health
+    tools = get_tools(str(ROOT))
+    tool_health = tools.health_check()
+    checks.append(("Tools", tool_health.get("success", False), tool_health.get("metadata", {})))
+
+    # 2. Memory
+    try:
+        mem = get_memory(project_root=str(ROOT))
+        count = mem.get_task_count() if hasattr(mem, 'get_task_count') else "N/A"
+        checks.append(("Memory", True, {"tasks": count}))
+    except Exception as e:
+        checks.append(("Memory", False, {"error": str(e)}))
+
+    # 3. LLM
+    try:
+        llm = get_llm_manager(str(ROOT))
+        prov = llm.get_provider_name()
+        model = llm.get_default_model()
+        checks.append(("LLM", True, {"provider": prov, "model": model}))
+    except Exception as e:
+        checks.append(("LLM", False, {"error": str(e)}))
+
+    # 4. Dashboard API (simple port check)
+    import socket
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        result = s.connect_ex(('127.0.0.1', 8001))
+        s.close()
+        checks.append(("Dashboard (8001)", result == 0, {}))
+    except:
+        checks.append(("Dashboard (8001)", False, {}))
+
+    # Print results
+    for name, ok, meta in checks:
+        status = "[green]✓ OK[/green]" if ok else "[red]✗ FAIL[/red]"
+        console.print(f"{status}  {name}")
+        if meta:
+            console.print(f"      {meta}")
+
+    console.print("\n[bold]Doctor complete.[/bold]")
+
+
 def main():
     parser = argparse.ArgumentParser(description="HermesClaw / Kairos-Hermes Swarm")
     sub = parser.add_subparsers(dest="command")
@@ -250,6 +301,10 @@ def main():
     # NEW: multi-platform bot (Telegram + Discord + WhatsApp) + 24/7 service
     p_bot = sub.add_parser("bot", help="Run the always-on bot orchestrator (multi-platform chat control)")
     p_bot.set_defaults(func=cmd_bot)
+
+    # NEW: doctor command (inspired by Claw Code)
+    p_doctor = sub.add_parser("doctor", help="Run system health check (like claw doctor)")
+    p_doctor.set_defaults(func=cmd_doctor)
 
     args = parser.parse_args()
     if not args.command:

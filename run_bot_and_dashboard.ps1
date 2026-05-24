@@ -60,22 +60,28 @@ Write-Host "============================================================`n"
 
 # Start FastAPI backend
 Write-Host "[1/3] Starting FastAPI Backend (http://localhost:8001)..."
-$BackendProcess = Start-Process powershell -ArgumentList "-NoExit -Command `"python -m uvicorn backend.dashboard_api:app --host 0.0.0.0 --port 8001 --reload`"" -PassThru -WindowStyle Normal
+$BackendProcess = Start-Process powershell -ArgumentList "-NoExit -Command `"python -m uvicorn backend.dashboard_api:app --host 0.0.0.0 --port 8001 --reload --reload-dir backend --reload-dir core --reload-dir hermes`"" -PassThru -WindowStyle Normal
 
 Start-Sleep -Seconds 2
 
-# Install dashboard dependencies if needed
-if (-not (Test-Path "dashboard\node_modules")) {
-    Write-Host "[2/3] Installing Node dependencies (first time only)..."
-    Push-Location dashboard
-    & npm install
-    Pop-Location
-} else {
-    Write-Host "[2/3] Starting React Dashboard (http://localhost:3000)..."
+# Determine dashboard folder
+$DashboardDir = "kairos"
+if (-not (Test-Path $DashboardDir)) {
+    $DashboardDir = "dashboard"
 }
 
-# Start React dashboard
-$DashboardProcess = Start-Process powershell -ArgumentList "-NoExit -Command `"cd dashboard; npm run dev`"" -PassThru -WindowStyle Normal
+# Install dashboard dependencies if needed
+if (-not (Test-Path "$DashboardDir\node_modules")) {
+    Write-Host "[2/3] Installing Node dependencies (first time only)..."
+    Push-Location $DashboardDir
+    & npm install --legacy-peer-deps
+    Pop-Location
+} else {
+    Write-Host "[2/3] Starting dashboard (http://localhost:3000)..."
+}
+
+# Start dashboard
+$DashboardProcess = Start-Process powershell -ArgumentList "-NoExit -Command `"cd $DashboardDir; npm run dev`"" -PassThru -WindowStyle Normal
 
 Start-Sleep -Seconds 3
 
