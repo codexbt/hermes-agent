@@ -1,0 +1,9 @@
+{
+  "name": "kairos-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "hardhat": "^2.16.0"
+  }
+}

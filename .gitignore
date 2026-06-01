@@ -41,19 +41,19 @@ ENV/
 # Logs
 logs/
 *.log
-hermes/hermes.log
+kairos/kairos.log
 
 # Generated / temporary
 output/
 *.bak-*
-hermes/skills/skill-*.yaml
-hermes/memory.db
-hermes/chroma_db/
+kairos/skills/skill-*.yaml
+kairos/memory.db
+kairos/chroma_db/
 *.db
-hermes/soul.md
-hermes/hermes.log
+kairos/soul.md
+kairos/kairos.log
 logs/
-hermes/skills/architecture_latest.md
+kairos/skills/architecture_latest.md
 dashboard/index.html
 kairos/
 

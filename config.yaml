@@ -22,9 +22,9 @@ ollama:
   max_tokens: 8192
 
 memory:
-  sqlite_path: "hermes/memory.db"
-  chroma_path: "hermes/chroma_db"
-  collection_name: "hermes_knowledge"
+  sqlite_path: "kairos/memory.db"
+  chroma_path: "kairos/chroma_db"
+  collection_name: "kairos_knowledge"
   max_context_tokens: 12000
 
 kairos:
@@ -32,7 +32,7 @@ kairos:
   scan_interval_minutes: 15
   max_proactive_fixes: 3
   require_user_approval: true
-  scan_paths: [".", "core", "hermes", "agents"]
+  scan_paths: [".", "core", "kairos", "agents"]
 
 swarm:
   max_concurrent_agents: 4
@@ -49,7 +49,7 @@ safety:
 
 logging:
   level: "INFO"
-  file: "hermes/hermes.log"
+  file: "kairos/kairos.log"
   console: true
 
 skills:
@@ -57,7 +57,7 @@ skills:
   min_success_threshold: 0.8
 
 soul:
-  file: "hermes/soul.md"
+  file: "kairos/soul.md"
   auto_update: true
 
 # Multi-platform bot configuration (Telegram + Discord + WhatsApp)

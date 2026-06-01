@@ -26,7 +26,7 @@ import yaml
 
 from core.react_loop import ReactLoop, get_react_loop
 from core.tools import get_tools
-from hermes.memory import get_memory
+from kairos.memory import get_memory
 
 logger = logging.getLogger("core.kairos")
 
@@ -126,7 +126,7 @@ class KairosDaemon:
             logger.info(f"KAIROS result for '{issue}': success={res.get('success')}")
 
         # Update soul with autonomous activity
-        soul = self.project_root / "hermes" / "soul.md"
+        soul = self.project_root / "kairos" / "soul.md"
         with open(soul, "a", encoding="utf-8") as f:
             f.write(f"\n\n## {datetime.now().isoformat()} (KAIROS)\nAutonomous scan completed. Issues addressed: {len(issues)}\n")
 
@@ -153,7 +153,7 @@ def main():
         format="%(asctime)s [KAIROS] %(message)s",
         handlers=[
             logging.StreamHandler(sys.stdout),
-            logging.FileHandler("hermes/hermes.log", encoding="utf-8"),
+            logging.FileHandler("kairos/kairos.log", encoding="utf-8"),
         ],
     )
 

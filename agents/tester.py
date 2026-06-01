@@ -8,8 +8,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
-from core.tools import ClawTools
-from hermes.memory import HermesMemory, TaskRecord
+from core.tools import KairosTools
+from kairos.memory import HermesMemory, TaskRecord
 
 logger = logging.getLogger("agents.tester")
 
@@ -28,7 +28,7 @@ class Tester:
 
     def __init__(
         self,
-        tools: ClawTools,
+        tools: KairosTools,
         memory: HermesMemory,
         llm_call: Optional[Callable[[str, str], str]] = None,
     ):

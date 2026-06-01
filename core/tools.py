@@ -38,7 +38,7 @@ except ImportError:
     Console = None
     Confirm = None
 
-logger = logging.getLogger("claw.tools")
+logger = logging.getLogger("kairos.tools")
 
 
 class ToolResult(dict):
@@ -61,7 +61,7 @@ class ToolResult(dict):
         )
 
 
-class ClawTools:
+class KairosTools:
     """Main harness providing safe file, shell, git and search capabilities."""
 
     DANGEROUS_KEYWORDS = [
@@ -92,10 +92,10 @@ class ClawTools:
         self.config = config or {}
         self.console = Console() if Console else None
         self._setup_logging()
-        logger.info(f"ClawTools initialized. Root: {self.root}")
+        logger.info(f"KairosTools initialized. Root: {self.root}")
 
     def _setup_logging(self) -> None:
-        log_file = self.root / "hermes" / "hermes.log"
+        log_file = self.root / "kairos" / "kairos.log"
         log_file.parent.mkdir(parents=True, exist_ok=True)
         handler = logging.FileHandler(log_file, encoding="utf-8")
         handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
@@ -421,4 +421,4 @@ def get_tools(
     approval_callback: Optional[Callable[[str], bool]] = None,
     config: Optional[dict] = None,
 ) -> ClawTools:
-    return ClawTools(project_root, approval_callback, config)
+    return KairosTools(project_root, approval_callback, config)

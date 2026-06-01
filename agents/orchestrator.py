@@ -1,5 +1,5 @@
 """agents/orchestrator.py
-Central swarm coordinator (Claw + Hermes style).
+Central swarm coordinator (Kairos style).
 Decomposes high-level goals into phases and routes to specialist agents.
 Maintains global state, memory writes, and final synthesis.
 """
@@ -11,10 +11,10 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
-from core.tools import ClawTools, get_tools
+from core.tools import KairosTools, get_tools
 from core.react_loop import make_llm_call
 from core.dashboard_events import emit_agent_update, emit_log, emit_metrics
-from hermes.memory import HermesMemory, get_memory, TaskRecord
+from kairos.memory import HermesMemory, get_memory, TaskRecord
 
 logger = logging.getLogger("agents.orchestrator")
 
@@ -70,7 +70,7 @@ class Orchestrator:
 
         context = self.memory.get_relevant_context(goal)
 
-        # Claw Code style: auto inject @path file references into context
+        # Kairos Code style: auto inject @path file references into context
         file_ctx = self.tools.extract_file_context(goal) if hasattr(self.tools, 'extract_file_context') else ""
         if file_ctx:
             context = (context + "\n\n" + file_ctx).strip()

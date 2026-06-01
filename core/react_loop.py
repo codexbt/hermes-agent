@@ -14,7 +14,7 @@ import time
 from typing import Any, Callable, Optional
 
 from core.llm import get_llm_manager
-from core.tools import ClawTools, get_tools
+from core.tools import KairosTools, get_tools
 from hermes.memory import HermesMemory, get_memory
 
 logger = logging.getLogger("core.react")
@@ -49,7 +49,7 @@ Rules:
 
     def __init__(
         self,
-        tools: Optional[ClawTools] = None,
+        tools: Optional[KairosTools] = None,
         memory: Optional[HermesMemory] = None,
         model: Optional[str] = None,
         project_root: str = ".",
@@ -114,7 +114,7 @@ Rules:
         system = self.DEFAULT_SYSTEM.format(tools=self._format_tools())
         memory_context = self.memory.get_relevant_context(goal, max_items=4)
 
-        # Claw Code style: auto-inject @path file context
+        # Kairos Code style: auto-inject @path file context
         file_context = self.tools.extract_file_context(goal) if hasattr(self.tools, 'extract_file_context') else ""
         combined_context = (extra_context + "\n" + file_context).strip()
 

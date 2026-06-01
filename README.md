@@ -357,3 +357,7 @@ MIT — Use freely. Keep it local. Make it better.
 ---
 
 **Built with ❤️ for developers who want a true local AI teammate that gets smarter every day.**
+
+## Contracts & Rewards
+- See `README_REWARDS.md` for the daily Top-20 vs Developer reward mechanics and distribution rules.
+- A minimal contracts scaffold (Hardhat + Solidity) is available in the `contracts/` folder (`HerToken`, `FeeSplitter`, `RewardDistributor`, `Staking`).

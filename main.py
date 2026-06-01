@@ -3,7 +3,7 @@ Kairos - Unified CLI entry point.
 Usage examples:
   python main.py --help
   python main.py swarm "..."
-  python main.py claw "..."
+  python main.py kairos "..."
   python main.py llm                 # interactive model/provider selector + auto-fetch
   python main.py llm --list
   python main.py status
@@ -30,7 +30,7 @@ from agents.orchestrator import run_swarm
 from core.kairos_daemon import KairosDaemon
 from core.react_loop import ReactLoop, get_react_loop, make_llm_call
 from core.tools import get_tools
-from hermes.memory import get_memory
+from kairos.memory import get_memory
 from core.llm import get_llm_manager
 
 console = Console()
@@ -39,7 +39,7 @@ console = Console()
 def banner():
     console.print(
         Panel.fit(
-            "[bold cyan]Kairos[/bold cyan]  •  [bold magenta]Kairos-Hermes Swarm[/bold magenta]\n"
+            "[bold cyan]Kairos[/bold cyan]  •  [bold magenta]Kairos Swarm[/bold magenta]\n"
             "Local-first • Self-hosted • Autonomous Multi-Agent Coding System",
             border_style="bright_blue",
         )
@@ -82,7 +82,7 @@ def cmd_status(_):
     mem = get_memory(project_root=str(ROOT))
     tools = get_tools(str(ROOT))
     count = mem.get_task_count()
-    console.print(Panel(f"Tasks completed: {count}\nSelf-improve trigger: {mem.should_trigger_self_improve()}", title="Hermes Memory"))
+    console.print(Panel(f"Tasks completed: {count}\nSelf-improve trigger: {mem.should_trigger_self_improve()}", title="Kairos Memory"))
     console.print("Project health:", tools.health_check().get("metadata"))
 
 

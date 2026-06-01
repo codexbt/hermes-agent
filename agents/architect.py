@@ -8,8 +8,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
-from core.tools import ClawTools
-from hermes.memory import HermesMemory
+from core.tools import KairosTools
+from kairos.memory import HermesMemory
 
 logger = logging.getLogger("agents.architect")
 
@@ -68,7 +68,7 @@ Produce the architecture plan now."""
             plan = self._fallback_plan(goal, structure, relevant)
 
         # Record design as artifact
-        design_path = "hermes/skills/architecture_latest.md"
+        design_path = "kairos/skills/architecture_latest.md"
         self.tools.write_file(design_path, f"# Architecture for: {goal}\n\n{plan}")
         logger.info("ARCHITECT produced design")
 
@@ -85,7 +85,7 @@ Produce the architecture plan now."""
 
 Goal: {goal}
 
-1. Design approach: Extend existing Claw-Hermes modular structure.
+1. Design approach: Extend existing Kairos modular structure.
    - Prefer adding to existing agents/ and core/ when possible.
    - Use typed dataclasses and return AgentResult everywhere.
 

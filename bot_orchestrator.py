@@ -8,7 +8,7 @@ Central multi-platform bot orchestrator for Kairos.
 - Sends rich responses back to the originating platform
 - Security: only allowed user IDs
 - Logging to logs/bot.log
-- Designed so core/ hermes/ agents/ are 100% untouched
+- Designed so core/ kairos/ agents/ are 100% untouched
 
 Run via: python main.py bot
 or the run_forever scripts.
@@ -288,7 +288,7 @@ async def run_goal_on_core(msg: Message, args: list[str]) -> str:
 def get_status() -> str:
     """Quick status of memory + current LLM + kairos."""
     try:
-        from hermes.memory import get_memory
+        from kairos.memory import get_memory
         mem = get_memory(project_root=str(ROOT))
         count = mem.get_task_count()
         from core.llm import get_llm_manager
