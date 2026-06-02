@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 220" role="img" aria-label="Kairos logo">
+  <defs>
+    <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8a8a8a"/>
+      <stop offset="100%" stop-color="#676767"/>
+    </linearGradient>
+  </defs>
+  <rect width="260" height="220" fill="none"/>
+  <path d="M60 100 L130 30 L200 100" fill="none" stroke="url(#lineGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  <path d="M60 100 L200 100" fill="none" stroke="url(#lineGrad)" stroke-width="14" stroke-linecap="round" opacity="0.9"/>
+  <path d="M60 100 L60 170" fill="none" stroke="url(#lineGrad)" stroke-width="14" stroke-linecap="round" opacity="0.9"/>
+  <path d="M200 100 L200 170" fill="none" stroke="url(#lineGrad)" stroke-width="14" stroke-linecap="round" opacity="0.9"/>
+  <path d="M60 170 L200 170" fill="none" stroke="url(#lineGrad)" stroke-width="14" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="60" cy="100" r="22" fill="#1968ae"/>
+  <circle cx="200" cy="100" r="22" fill="#1968ae"/>
+  <circle cx="60" cy="170" r="22" fill="#1968ae"/>
+  <circle cx="200" cy="170" r="22" fill="#1968ae"/>
+  <circle cx="130" cy="30" r="22" fill="#f5851f"/>
+</svg>

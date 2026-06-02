@@ -1,5 +1,9 @@
 # Kairos (Kairos-Swarm)
 
+<p align="center">
+  <img src="./README-logo.svg" alt="Kairos logo" width="260" />
+</p>
+
 **Local-first, self-hosted, autonomous multi-agent coding swarm.**
 
 Combines the power of Claw-style tool harness with Hermes-style persistent memory, auto-skill creation, and self-improvement.
