@@ -12,6 +12,20 @@ Defaults to 100% local via Ollama, but supports any remote model (OpenAI, Groq, 
 - Full user control + explicit approval for every destructive action
 - Agents that learn and improve themselves over time
 
+---
+
+## ⚡ TL;DR - One Command Install + Run
+
+```powershell
+# Windows PowerShell - Install
+cd D:\hermes; python -m venv .venv; .\.venv\Scripts\Activate.ps1; pip install -r requirements.txt
+
+# Then start KAIROS daemon
+python main.py kairos
+```
+
+---
+
 ## 📁 Exact Project Structure
 
 ```
@@ -69,8 +83,20 @@ D:\hermes\
 - Git
 - [Ollama](https://ollama.com) (for local mode) — optional if you only use remote providers
 
-### 2. Install
+### 2. One-Liner Install
 
+**Copy & paste this single command into PowerShell:**
+
+```powershell
+cd D:\hermes; python -m venv .venv; .\.venv\Scripts\Activate.ps1; pip install -r requirements.txt
+```
+
+Alternatively, for `cmd.exe`:
+```cmd
+cd D:\hermes & python -m venv .venv & .venv\Scripts\activate.bat & pip install -r requirements.txt
+```
+
+**Or step-by-step** (if you prefer):
 ```powershell
 cd D:\hermes
 python -m venv .venv
