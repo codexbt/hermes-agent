@@ -1,8 +1,13 @@
 # Kairos (Kairos-Swarm)
 
 <p align="center">
-  <img src="./README-logo.svg" alt="Kairos logo" width="260" />
+  <img src="./kairos.png" alt="Kairos logo" width="260" />
 </p>
+
+
+$Kairos 
+CA - Fyc2fmukseRMx5k2Pk4MXBpzzEbmaECBUHQDDh89pump
+
 
 **Local-first, self-hosted, autonomous multi-agent coding swarm.**
 
