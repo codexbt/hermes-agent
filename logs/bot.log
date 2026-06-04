@@ -727,3 +727,84 @@ Traceback (most recent call last):
   File "C:\Users\Naquib\AppData\Local\Programs\Python\Python310\lib\asyncio\proactor_events.py", line 401, in _loop_writing
     self._write_fut = self._loop._proactor.send(self._sock, data)
 AttributeError: 'NoneType' object has no attribute 'send'
+2026-06-04 00:47:50,761 [INFO] bot_orchestrator: === Kairos Multi-Platform Bot Starting ===
+2026-06-04 00:47:50,767 [INFO] interfaces.messaging: Registered handler for platform: telegram
+2026-06-04 00:47:50,768 [INFO] interfaces.messaging: Registered handler for platform: discord
+2026-06-04 00:47:50,769 [INFO] interfaces.messaging: Registered handler for platform: whatsapp
+2026-06-04 00:47:50,771 [INFO] bot_orchestrator: Listener task created for telegram
+2026-06-04 00:47:50,771 [INFO] bot_orchestrator: Listener task created for discord
+2026-06-04 00:47:50,773 [INFO] bot_orchestrator: Listener task created for whatsapp
+2026-06-04 00:47:50,774 [INFO] bot_orchestrator: All platforms listening. Bot is live.
+2026-06-04 00:47:54,021 [INFO] bot_orchestrator: Telegram polling started
+2026-06-04 00:47:55,266 [WARNING] discord.client: PyNaCl is not installed, voice will NOT be supported
+2026-06-04 00:47:55,266 [WARNING] discord.client: davey is not installed, voice will NOT be supported
+2026-06-04 00:47:55,269 [INFO] bot_orchestrator: Discord bot starting...
+2026-06-04 00:47:55,270 [INFO] discord.client: logging in using static token
+2026-06-04 00:47:55,275 [WARNING] bot_orchestrator: WhatsApp listening not supported reliably with pywhatkit. Use webhook or official API for incoming messages.
+2026-06-04 00:47:55,868 [ERROR] bot_orchestrator: Discord handler failed: Improper token has been passed.
+Traceback (most recent call last):
+  File "D:\kairos\.venv\lib\site-packages\discord\http.py", line 844, in static_login
+    data = await self.request(Route('GET', '/users/@me'))
+  File "D:\kairos\.venv\lib\site-packages\discord\http.py", line 778, in request
+    raise HTTPException(response, data)
+discord.errors.HTTPException: 401 Unauthorized (error code: 0): 401: Unauthorized
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\kairos\bot_orchestrator.py", line 224, in start_listening
+    await self.bot.start(self.token)
+  File "D:\kairos\.venv\lib\site-packages\discord\client.py", line 850, in start
+    await self.login(token)
+  File "D:\kairos\.venv\lib\site-packages\discord\client.py", line 679, in login
+    data = await self.http.static_login(token)
+  File "D:\kairos\.venv\lib\site-packages\discord\http.py", line 848, in static_login
+    raise LoginFailure('Improper token has been passed.') from exc
+discord.errors.LoginFailure: Improper token has been passed.
+2026-06-04 00:47:56,467 [INFO] httpx: HTTP Request: POST https://api.telegram.org/bot123456789:ABCDEFGhijklmnopqrstuvwxyz.../getMe "HTTP/1.1 404 Not Found"
+2026-06-04 00:47:56,471 [ERROR] bot_orchestrator: Telegram handler failed: The token `123456789:ABCDEFGhijklmnopqrstuvwxyz...` was rejected by the server.
+Traceback (most recent call last):
+  File "D:\kairos\.venv\lib\site-packages\telegram\_bot.py", line 857, in initialize
+    await self.get_me()
+  File "D:\kairos\.venv\lib\site-packages\telegram\ext\_extbot.py", line 2008, in get_me
+    return await super().get_me(
+  File "D:\kairos\.venv\lib\site-packages\telegram\_bot.py", line 990, in get_me
+    result = await self._post(
+  File "D:\kairos\.venv\lib\site-packages\telegram\_bot.py", line 704, in _post
+    return await self._do_post(
+  File "D:\kairos\.venv\lib\site-packages\telegram\ext\_extbot.py", line 370, in _do_post
+    return await super()._do_post(
+  File "D:\kairos\.venv\lib\site-packages\telegram\_bot.py", line 733, in _do_post
+    result = await request.post(
+  File "D:\kairos\.venv\lib\site-packages\telegram\request\_baserequest.py", line 198, in post
+    result = await self._request_wrapper(
+  File "D:\kairos\.venv\lib\site-packages\telegram\request\_baserequest.py", line 375, in _request_wrapper
+    raise exception
+telegram.error.InvalidToken: Not Found
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\kairos\bot_orchestrator.py", line 162, in start_listening
+    await self.app.initialize()
+  File "D:\kairos\.venv\lib\site-packages\telegram\ext\_application.py", line 489, in initialize
+    await self.bot.initialize()
+  File "D:\kairos\.venv\lib\site-packages\telegram\ext\_extbot.py", line 316, in initialize
+    await super().initialize()
+  File "D:\kairos\.venv\lib\site-packages\telegram\_bot.py", line 860, in initialize
+    raise InvalidToken(f"The token `{self._token}` was rejected by the server.") from exc
+telegram.error.InvalidToken: The token `123456789:ABCDEFGhijklmnopqrstuvwxyz...` was rejected by the server.
+2026-06-04 00:47:56,998 [ERROR] asyncio: Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x00000242E8433B50>, 284855.859)])']
+connector: <aiohttp.connector.TCPConnector object at 0x00000242E8416800>
+2026-06-04 00:47:57,007 [ERROR] asyncio: Fatal error on SSL transport
+protocol: <asyncio.sslproto.SSLProtocol object at 0x00000242E8416E00>
+transport: <_ProactorSocketTransport fd=1440 read=<_OverlappedFuture cancelled>>
+Traceback (most recent call last):
+  File "C:\Users\Naquib\AppData\Local\Programs\Python\Python310\lib\asyncio\sslproto.py", line 690, in _process_write_backlog
+    self._transport.write(chunk)
+  File "C:\Users\Naquib\AppData\Local\Programs\Python\Python310\lib\asyncio\proactor_events.py", line 365, in write
+    self._loop_writing(data=bytes(data))
+  File "C:\Users\Naquib\AppData\Local\Programs\Python\Python310\lib\asyncio\proactor_events.py", line 401, in _loop_writing
+    self._write_fut = self._loop._proactor.send(self._sock, data)
+AttributeError: 'NoneType' object has no attribute 'send'

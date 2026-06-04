@@ -1,113 +1,65 @@
 # ============================================================
-# Kairos Bot + Dashboard Unified Launcher (PowerShell)
-# ============================================================
-# Usage: .\run_bot_and_dashboard.ps1
-#
-# This script:
-# 1. Sets up Python virtual environment
-# 2. Installs Python dependencies
-# 3. Sets up Node.js dependencies
-# 4. Starts FastAPI backend (port 8001)
-# 5. Starts React dashboard (port 3000)
-# 6. Starts bot orchestrator
+# Kairos Bot + Dashboard Unified Launcher
 # ============================================================
 
-param(
-    [switch]$NoWait = $false,
-    [switch]$Headless = $false
-)
+param()
 
-$ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 
-Write-Host "`n============================================================"
+Write-Host ""
+Write-Host "============================================================"
 Write-Host "Kairos: Bot + Dashboard Unified Launcher" -ForegroundColor Cyan
-Write-Host "============================================================`n"
+Write-Host "============================================================"
+Write-Host ""
 
-# Create .env from .env.example
-if (-not (Test-Path ".env")) {
-    Write-Host "Creating .env from .env.example..."
-    if (Test-Path ".env.example") {
-        Copy-Item ".env.example" ".env"
-        Write-Host "[INFO] .env created. Please edit it with your API keys!`n" -ForegroundColor Yellow
-    }
-}
-
-# Create venv if needed
-if (-not (Test-Path "venv")) {
+$VenvPath = ".venv"
+if (-not (Test-Path $VenvPath)) {
     Write-Host "Creating Python virtual environment..."
-    & python -m venv venv
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to create virtual environment"
-    }
+    python -m venv ".venv"
 }
 
-# Activate venv
-Write-Host "Activating Python virtual environment..."
-& ".\venv\Scripts\Activate.ps1"
+$PythonExe = ".venv\Scripts\python.exe"
 
-# Install Python dependencies
-Write-Host "Installing Python dependencies..."
-& pip install -q -r requirements.txt
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to install Python packages"
+Write-Host "Checking Python dependencies..."
+. $PythonExe -c "import fastapi, pydantic, discord" 2>$null
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✓ Dependencies OK"
+} else {
+    Write-Host "Installing dependencies (this may take a few minutes)..."
+    Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Milliseconds 500
+    . $PythonExe -m pip install -r requirements.txt --upgrade
 }
 
-Write-Host "`n============================================================"
+Write-Host ""
+Write-Host "============================================================"
 Write-Host "Starting Services..."
-Write-Host "============================================================`n"
+Write-Host "============================================================"
+Write-Host ""
 
-# Start FastAPI backend
-Write-Host "[1/3] Starting FastAPI Backend (http://localhost:8001)..."
-$BackendProcess = Start-Process powershell -ArgumentList "-NoExit -Command `"python -m uvicorn backend.dashboard_api:app --host 0.0.0.0 --port 8001 --reload --reload-dir backend --reload-dir core --reload-dir hermes`"" -PassThru -WindowStyle Normal
-
+Write-Host "[1/3] FastAPI Backend (http://localhost:8001)..."
+$cmd1 = "$PythonExe -m uvicorn backend.dashboard_api:app --host 0.0.0.0 --port 8001 --reload"
+Start-Process powershell -Args "-NoExit -Command $cmd1"
 Start-Sleep -Seconds 2
 
-# Determine dashboard folder
-$DashboardDir = "kairos"
-if (-not (Test-Path $DashboardDir)) {
-    $DashboardDir = "dashboard"
-}
+$DashboardDir = if (Test-Path "kairos") { "kairos" } else { "dashboard" }
+Write-Host "[2/3] React Dashboard (http://localhost:3000)..."
+$cmd2 = "cd $DashboardDir; npm run dev"
+Start-Process powershell -Args "-NoExit -Command $cmd2"
+Start-Sleep -Seconds 2
 
-# Install dashboard dependencies if needed
-if (-not (Test-Path "$DashboardDir\node_modules")) {
-    Write-Host "[2/3] Installing Node dependencies (first time only)..."
-    Push-Location $DashboardDir
-    & npm install --legacy-peer-deps
-    Pop-Location
-} else {
-    Write-Host "[2/3] Starting dashboard (http://localhost:3000)..."
-}
+Write-Host "[3/3] Bot Orchestrator..."
+$cmd3 = "$PythonExe bot_orchestrator.py"
+Start-Process powershell -Args "-NoExit -Command $cmd3"
 
-# Start dashboard
-$DashboardProcess = Start-Process powershell -ArgumentList "-NoExit -Command `"cd $DashboardDir; npm run dev`"" -PassThru -WindowStyle Normal
-
-Start-Sleep -Seconds 3
-
-# Start bot orchestrator
-Write-Host "[3/3] Starting Bot/Swarm Orchestrator..."
-$BotProcess = Start-Process powershell -ArgumentList "-NoExit -Command `"python bot_orchestrator.py`"" -PassThru -WindowStyle Normal
-
-Write-Host "`n============================================================"
+Write-Host ""
+Write-Host "============================================================"
 Write-Host "ALL SERVICES STARTED!" -ForegroundColor Green
-Write-Host "============================================================`n"
-Write-Host "Open your browser: http://localhost:3000`n"
-Write-Host "Services:"
-Write-Host "  - 3D Dashboard:  http://localhost:3000"
-Write-Host "  - FastAPI Docs: http://localhost:8001/docs"
-Write-Host "  - Bot Console:   Active in separate window`n"
-Write-Host "Process IDs:"
-Write-Host "  - Backend: $($BackendProcess.Id)"
-Write-Host "  - Dashboard: $($DashboardProcess.Id)"
-Write-Host "  - Bot: $($BotProcess.Id)`n"
-Write-Host "============================================================`n"
-
-if (-not $NoWait) {
-    Write-Host "Press any key to exit (this will NOT stop the services)..."
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-}
-
-Write-Host "Launcher closing. Services continue running in their windows.`n"
-
-
+Write-Host "============================================================"
+Write-Host ""
+Write-Host "Dashboard:  http://localhost:3000"
+Write-Host "FastAPI:    http://localhost:8001/docs"
+Write-Host ""
+Write-Host "============================================================"
+Write-Host ""
