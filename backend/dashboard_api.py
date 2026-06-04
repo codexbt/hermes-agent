@@ -101,6 +101,10 @@ app = FastAPI(title="KAIROS - AI Operating System", version="1.0")
 async def root():
     return {"message": "KAIROS Backend is running. Visit /docs for API documentation."}
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 # CORS for React dev server (localhost:3000) and production
 app.add_middleware(
     CORSMiddleware,
