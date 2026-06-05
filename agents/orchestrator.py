@@ -53,11 +53,15 @@ class Orchestrator:
         from agents.coder import Coder
         from agents.tester import Tester
         from agents.scribe import Scribe
+        from agents.web_agent import WebAgent
+        from agents.validator_agent import ValidatorAgent
 
         self.agents = {
             "architect": Architect(self.tools, self.memory, self.llm_call),
+            "web_agent": WebAgent(self.tools, self.memory, self.llm_call),
             "coder": Coder(self.tools, self.memory, self.llm_call),
             "tester": Tester(self.tools, self.memory, self.llm_call),
+            "validator": ValidatorAgent(self.tools, self.memory, self.llm_call),
             "scribe": Scribe(self.tools, self.memory, self.llm_call),
         }
 
@@ -82,23 +86,43 @@ class Orchestrator:
             emit_agent_update("Architect", "error", "Architecture failed")
             return self._finalize(goal, False, "Architecture phase failed", start)
 
-        # Phase 2: Implementation (may loop internally)
+        # Phase 2: Web research
+        emit_agent_update("WebAgent", "working", "Researching", 35)
+        web_result = self.agents["web_agent"].run(goal, arch.output)
+        if not web_result.success:
+            emit_agent_update("WebAgent", "error", "Web research failed")
+            return self._finalize(goal, False, "Web research phase failed", start)
+
+        # Phase 3: Implementation (may loop internally)
         emit_agent_update("Coder", "working", "Implementing solution using tools", 45)
-        impl = self.agents["coder"].run(goal, arch.output + "\n\n" + context)
+        impl = self.agents["coder"].run(
+            goal,
+            arch.output + "\n\n" + web_result.output
+        )
         if not impl.success:
             emit_agent_update("Coder", "error", "Coding failed")
             return self._finalize(goal, False, "Coding phase failed", start)
 
-        # Phase 3: Testing & verification
+        # Phase 4: Testing & verification
         emit_agent_update("Tester", "working", "Validating implementation", 70)
         test = self.agents["tester"].run(goal, impl.output)
         if not test.success:
-            logger.warning("Tests reported issues - continuing to scribe")
+            logger.warning("Tests reported issues - continuing to validator")
             emit_log("Tests had issues but continuing", "warning", "Tester")
 
-        # Phase 4: Documentation & learning capture
-        emit_agent_update("Scribe", "working", "Capturing knowledge + updating soul", 85)
-        scribe = self.agents["scribe"].run(goal, "\n".join([arch.output, impl.output, test.output]))
+        # Phase 5: Validation
+        emit_agent_update("Validator", "working", "Validating results", 80)
+        validator = self.agents["validator"].run(goal, impl.output)
+        if not validator.success:
+            emit_agent_update("Validator", "error", "Validation failed")
+            return self._finalize(goal, False, "Validation phase failed", start)
+
+        # Phase 6: Documentation & learning capture
+        emit_agent_update("Scribe", "working", "Capturing knowledge + updating soul", 90)
+        scribe = self.agents["scribe"].run(
+            goal,
+            "\n".join([arch.output, web_result.output, impl.output, test.output, validator.output])
+        )
 
         duration = time.time() - start
         success = impl.success and arch.success
@@ -113,7 +137,7 @@ class Orchestrator:
                 duration=duration,
                 agent="orchestrator",
                 result_summary=scribe.output[:500],
-                metadata={"phases": ["architect", "coder", "tester", "scribe"]},
+                metadata={"phases": ["architect", "web_agent", "coder", "tester", "validator", "scribe"]},
             )
         )
 

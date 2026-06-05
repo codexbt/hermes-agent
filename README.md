@@ -341,7 +341,7 @@ See `.env.example` for all available options.
 
 | Command                        | Description                                      |
 |--------------------------------|--------------------------------------------------|
-| `python main.py swarm "..."`   | Full multi-agent swarm (Architect → Coder → ...) |
+| `python main.py swarm "..."`   | Full multi-agent swarm (Architect → WebAgent → Coder → Tester → Validator → Scribe) |
 | `python main.py claw "..."`    | Direct powerful ReAct single-agent mode          |
 | `python main.py kairos --once` | One autonomous scan + fix cycle                  |
 | `python main.py kairos`        | Start the 24/7 background daemon                 |
