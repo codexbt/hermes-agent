@@ -1,0 +1,9 @@
+.git
+.venv
+__pycache__
+node_modules
+logs
+output
+tmp
+pip_cache
+.env
